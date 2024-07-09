@@ -7,7 +7,7 @@ const client = generateClient<Schema>();
 
 function App() {
   const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
-
+  const [hello, setHello] = useState<string>("");
   useEffect(() => {
     client.models.Todo.observeQuery().subscribe({
       next: (data) => setTodos([...data.items]),
@@ -22,12 +22,22 @@ function App() {
     client.models.Todo.create({ content: window.prompt("Todo content") });
   }
 
+  function sayHello(){
+    const returned = client.queries.Hello({name: "AWS Amplify"})
+    returned.then((data) => {
+      const helow: string | null = data?.data;
+      setHello(helow || "Error");
+    })
+    
+  }
+
   return (
     <Authenticator>
-      {({ signOut }) => (
+      {({ signOut, user }) => (
         <main>
-          <h1>My todos</h1>
+          <h1>{user?.signInDetails?.loginId}'s' todos</h1>
           <button onClick={createTodo}>+ new</button>
+          <button onClick={sayHello}>{hello}</button>
           <ul>
             {todos.map((todo) => (
               <li key={todo.id}>
